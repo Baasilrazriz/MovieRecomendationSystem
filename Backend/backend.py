@@ -22,24 +22,36 @@ class MovieRecommendationSystem:
     def load_user_searches(self, path):
         return pd.read_csv(path, encoding='latin1')
 
-    def login(self, username, password, credentials_file):
-        with open(credentials_file, 'r') as file:
-            reader = csv.reader(file)
-            for row in reader:
-                stored_username, stored_password = row
-                if stored_username == username and stored_password == password:
-                    print("Login successful.")
-                    self.logged_in_user = username
-                    return True
-        print("Invalid username or password.")
-        return False
-
+    def login(self, username, password=None, credentials_file="authentication.txt"):
+        if password is None:
+            # If password is not provided, assume Google login and only use username
+            self.logged_in_user = username
+            print("Login successful.")
+            return True
+        else:
+            # If password is provided, validate it
+            with open(credentials_file, 'r') as file:
+                reader = csv.reader(file)
+                for row in reader:
+                    stored_username, stored_password = row
+                    if stored_username == username and stored_password == password:
+                        print("Login successful.")
+                        self.logged_in_user = username
+                        return True
+            print("Invalid username or password.")
+            return False
     def recommend_movies(self):
         recommendations = {}
         if self.logged_in_user:
             user_watched_movies = self.user_history[self.user_history['Username'] == self.logged_in_user]
+        
+        # If the user has no watched movies, treat them as a new user
+            if user_watched_movies.empty:
+                return self.initial_recommendation()
+    
             user_features = user_watched_movies[['director_name', 'genres', 'plot_keywords', 'duration',
                                                   'actor_1_name', 'actor_2_name', 'actor_3_name']].fillna('')
+        
             
             # Convert numeric columns to string
             user_features['duration'] = user_features['duration'].astype(str)

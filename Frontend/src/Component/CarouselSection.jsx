@@ -33,7 +33,7 @@ const CarouselSection = ({ title, movies }) => {
       <Slider {...settings}>
         {movies.map((movie, index) => (
           <div key={index} className="px-2">
-            <img src={movie.image} alt={movie.title} className="w-full rounded" />
+            <img src={movie.image?movie.image:"https://m.media-amazon.com/images/M/MV5BODM0ODg1NDI0NF5BMl5BanBnXkFtZTcwMjk0NzA0MQ@@._V1_SX300.jpg"} alt={movie.title} className="w-full rounded" />
             <p className="mt-2 text-white">{movie.title}</p>
           </div>
         ))}

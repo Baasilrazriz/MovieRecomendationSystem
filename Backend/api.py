@@ -10,7 +10,7 @@ api_key = os.getenv('OMDB_API_KEY', 'ad45e532')
 def login():
     data = request.json
     username = data.get('username')
-    password = data.get('password')
+    password = data.get('password')  # This will be None if not provided
     credentials_file = "authentication.txt"
     if system.login(username, password, credentials_file):
         return jsonify({"message": "Login successful."}), 200

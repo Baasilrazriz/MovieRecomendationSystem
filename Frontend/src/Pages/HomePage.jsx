@@ -2,7 +2,9 @@ import React from 'react'
 import CarouselSection from '../Component/CarouselSection'
 import HeroSection from '../Component/HeroSection'
 import Header from '../Component/Header'
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import MovieModal from '../Modal/MovieModal';
+
 const moviesData = [
     { title: 'Movie 1', image: 'https://m.media-amazon.com/images/M/MV5BODM0ODg1NDI0NF5BMl5BanBnXkFtZTcwMjk0NzA0MQ@@._V1_SX300.jpg' },
     { title: 'Movie 2', image: 'https://m.media-amazon.com/images/M/MV5BODM0ODg1NDI0NF5BMl5BanBnXkFtZTcwMjk0NzA0MQ@@._V1_SX300.jpg' },
@@ -10,6 +12,7 @@ const moviesData = [
     // Add more movie objects
   ];
 function HomePage() {
+
     const bgHero = useSelector((state) => state.home.bgHero);
   return (
 <>
@@ -18,6 +21,7 @@ function HomePage() {
       <Header />
       <HeroSection />
       </div>
+      <MovieModal />
       <div className="px-8">
         <CarouselSection title="Matched to You" movies={moviesData} />
         <CarouselSection title="New on Netflix" movies={moviesData} />

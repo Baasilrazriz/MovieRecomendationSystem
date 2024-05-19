@@ -20,10 +20,10 @@ function LandingPage() {
     }, []);
   return (
     <>
-<div className="relative min-h-screen  text-white flex flex-col items-center justify-center ">
+<div className= " bg-gray-600 relative min-h-screen  text-white flex flex-col items-center justify-center  overflow-hidden">
    <div className={`w-screen h-screen`} style={{ backgroundImage: `${bg}` }}>
-   <header className={`z-50 w-screen p-6 flex justify-between items-center ${isScrolled ? 'bg-black' : 'bg-transparent'} fixed top-0`}>
-        <div className="text-3xl pl-10 font-bold">Basflix</div>
+   <header className={`z-50 w-screen p-6 px-20 flex justify-between items-center ${isScrolled ? 'bg-black' : 'bg-transparent'} fixed top-0`}>
+   <a href='/' className=" text-red-600 text-4xl font-bold">BASFLIX</a>
         <button onClick={()=>{nav("/login"); }} className="bg-gradient-to-r from-red-800 to-red-600    text-white font-bold   hover:scale-95 hover:bg-gradient-to-r hover:from-red-600 hover:to-red-500 px-4 py-2 rounded">Sign In</button>
       </header>
       <main className="flex flex-col items-center  mt-60 ">
@@ -41,13 +41,13 @@ function LandingPage() {
       </main>
    </div>
    <div className='w-screen'>
-   <div className='absolute top-[39rem] left-28  bg-black '>
+   <div className='absolute top-[44rem]  left-52  bg-black '>
     <img className='h-full w-full object-cover' src={banner} alt="" srcset="" />
    </div>
-   <div>
+   <div className='mt-2'>
     
    {sections.map((sec) => (
-    <div className='bg-black' id={sec.name}>
+    <div className='bg-black ' id={sec.name}>
     <img  className='h-full w-full object-cover ' src={sec.image} alt="" srcset="" />
    </div>
                      
