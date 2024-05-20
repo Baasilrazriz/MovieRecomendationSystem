@@ -1,10 +1,16 @@
 from flask import Flask, request, jsonify
 import os
+from flask_cors import CORS
 from backend import MovieRecommendationSystem
 app = Flask(__name__)
+CORS(app)
+
 system = MovieRecommendationSystem("movie_dataset.csv", "User_history.csv", "User_searches.csv")
 
 api_key = os.getenv('OMDB_API_KEY', 'ad45e532')
+@app.route('/')
+def welcome():
+    return jsonify({"logged_in_user": system.logged_in_user})
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -17,6 +23,19 @@ def login():
     else:
         return jsonify({"message": "Invalid username or password."}), 401
 
+@app.route('/recommendMoviesByname', methods=['GET'])
+def recommendMoviesByname():
+    # Check if user is logged in
+    if system.logged_in_user is None:
+        return jsonify({"message": "Please log in to get recommendations."}), 401
+
+    # Get movie name from request parameters
+    movie_name = request.args.get('movie_name')
+
+    # Get movie recommendations
+    recommendations = system.recommend_movies_based_on_movie_name(movie_name)
+
+    return jsonify({"recommendations": recommendations}), 200
 @app.route('/recommend_movies', methods=['GET'])
 def recommend_movies():
     if system.logged_in_user:
@@ -45,7 +64,7 @@ def get_movie_categories():
     categories = system.get_movie_categories()
     return jsonify({"categories": categories}), 200
 
-@app.route('/movie_category_filter', methods=['GET'])
+@app.route('/movie_filter_by_category', methods=['GET'])
 def movie_category_filter():
     category = request.args.get('category')
     if category:

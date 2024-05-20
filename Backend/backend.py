@@ -4,6 +4,7 @@ import requests
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
+
 class MovieRecommendationSystem:
     def __init__(self, imdb_dataset_path, user_history_path, user_searches_path):
         self.imdb_dataset = self.load_imdb_dataset(imdb_dataset_path)
@@ -49,6 +50,52 @@ class MovieRecommendationSystem:
         return categories
 
 
+
+    def recommend_movies_based_on_movie_name(self, movie_name):
+        recommendations = {}
+        
+        # Check if the movie exists in the dataset
+        # Convert both input and titles in dataset to lower case to avoid case sensitivity issues
+        # Also strip leading/trailing whitespaces
+        if movie_name.lower().strip() not in self.imdb_dataset['movie_title'].str.lower().str.strip().values:
+            recommendations['error'] = "Movie not found."
+            return recommendations
+
+        # Get the features of the input movie
+        # Use the same lower and strip transformations for the comparison
+        movie_features = self.imdb_dataset[self.imdb_dataset['movie_title'].str.lower().str.strip() == movie_name.lower().strip()][['director_name', 'genres', 'plot_keywords', 'duration',
+                                                      'actor_1_name', 'actor_2_name', 'actor_3_name']].fillna('')
+        
+        # Convert numeric columns to string
+        movie_features['duration'] = movie_features['duration'].astype(str)
+
+        # Concatenate all features into a single string
+        movie_features_str = movie_features.apply(lambda x: ' '.join(x.astype(str)), axis=1)
+
+        # Fit TF-IDF vectorizer on IMDb dataset
+        self.tf_idf_vectorizer.fit(self.imdb_dataset.apply(lambda x: ' '.join(x.fillna('').astype(str)), axis=1))
+
+        # Transform movie features and all movies features to TF-IDF vectors
+        movie_tfidf = self.tf_idf_vectorizer.transform(movie_features_str)
+        all_movies_tfidf = self.tf_idf_vectorizer.transform(self.imdb_dataset.apply(lambda x: ' '.join(x.fillna('').astype(str)), axis=1))
+
+        # Calculate cosine similarity between movie features and all movies features
+        similarity_scores = cosine_similarity(movie_tfidf, all_movies_tfidf)
+
+        # Get indices of top 6 similar movies (including the input movie itself)
+        top_indices = similarity_scores.argsort(axis=1)[:, ::-1][:, :6]
+
+        # Print recommended movies with all metadata including poster URLs
+        print(f"Top 5 recommended movies for movie {movie_name}:")
+        for i, index in enumerate(top_indices[0]):  # Only take the first 6 indices
+            if i == 0:  # Skip the first index because it's the input movie itself
+                continue
+            movie_metadata = self.imdb_dataset.iloc[index].to_dict()
+            poster_url = self.get_poster_url_from_title(movie_metadata['movie_title'])
+            movie_metadata['poster_url'] = poster_url
+            recommendations[i-1] = movie_metadata  # i-1 because we skipped the first index
+
+        return recommendations
     def recommend_movies(self):
         recommendations = {}
         if self.logged_in_user:
@@ -133,24 +180,28 @@ class MovieRecommendationSystem:
             # Save the updated user_history dataset back to the CSV file
             self.user_history.to_csv("User_history.csv", index=False, encoding='latin1')
            
-            print(f"Movie '{movie_name}' recorded in user history.")
+            return(f"Movie '{movie_name}' recorded in user history.")
         else:
-            print(f"Movie '{movie_name}' not found in the IMDb dataset.")
+            return(f"Movie '{movie_name}' not found in the IMDb dataset.")
     
     def movie_category_filter(self, category):
-    # Split the 'genres' column and check if the category is in the genres
+        recommendations = {}
+    
+        # Split the 'genres' column and check if the category is in the genres
         filtered_movies = self.imdb_dataset[self.imdb_dataset['genres'].str.contains(category, case=False, na=False)]
-
-    # Get the top 100 movies that match the category
-        top_100_movies = filtered_movies.head(100)
-
-    # Return or print the metadata of the filtered movies
-        print(f"Top 100 movies in category '{category}':")
-        for _, movie in top_100_movies.iterrows():
+    
+        # Get the top 5 movies that match the category
+        top_10_movies = filtered_movies.head(5)
+    
+        # Return the metadata of the filtered movies
+        print(f"Top 5 movies in category '{category}':")
+        for i, (_, movie) in enumerate(top_10_movies.iterrows()):
             movie_metadata = movie.to_dict()
             poster_url = self.get_poster_url_from_title(movie_metadata['movie_title'])
             movie_metadata['poster_url'] = poster_url
-            print(movie_metadata)
+            recommendations[i] = movie_metadata
+    
+        return recommendations
 
 
     def on_change_search(self, search_input):
