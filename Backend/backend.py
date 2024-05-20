@@ -40,6 +40,15 @@ class MovieRecommendationSystem:
                         return True
             print("Invalid username or password.")
             return False
+    def get_movie_categories(self):
+    # Assuming 'genres' is a column in your dataset that contains the genres of each movie
+    # and each genre is separated by a comma
+        all_genres = self.imdb_dataset['genres'].str.split('|').explode()  # Split by '|' and then explode to flatten
+        unique_genres = all_genres.unique()  # Get unique genres
+        categories = sorted(unique_genres.tolist())  # Sort the list for better readability
+        return categories
+
+
     def recommend_movies(self):
         recommendations = {}
         if self.logged_in_user:

@@ -39,6 +39,11 @@ def record_user_history():
         return jsonify({"message": message}), 200
     else:
         return jsonify({"message": "Please login first."}), 403
+    
+@app.route('/movie_categories', methods=['GET'])
+def get_movie_categories():
+    categories = system.get_movie_categories()
+    return jsonify({"categories": categories}), 200
 
 @app.route('/movie_category_filter', methods=['GET'])
 def movie_category_filter():
