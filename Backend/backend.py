@@ -214,6 +214,10 @@ class MovieRecommendationSystem:
 
             movie_info['Username'] = self.logged_in_user
 
+            # Check if the movie already exists in user_history for the logged in user
+            if movie_name in self.user_history[self.user_history['Username'] == self.logged_in_user]['movie_title'].values:
+                return(f"Movie '{movie_name}' already exists in user history.")
+            
             # Append the movie information to the user_history dataset
             self.user_history = pd.concat([self.user_history, pd.DataFrame(movie_info, index=[0])], ignore_index=True)
             # Save the updated user_history dataset back to the CSV file
@@ -265,9 +269,9 @@ class MovieRecommendationSystem:
                 # Save the updated user_searches dataset back to the CSV file
                 self.user_searches.to_csv("User_searches.csv", index=False, encoding='latin1')
                 
-                print(f"Search for '{search_input}' recorded with matching movies.")
+                return(f"Search for '{search_input}' recorded with matching movies.")
             else:
-                print(f"No movies found for search input '{search_input}'.")
+                return(f"No movies found for search input '{search_input}'.")
         else:
             print("Please login first.")
 
@@ -307,3 +311,10 @@ class MovieRecommendationSystem:
 
     def extract_imdb_id(self, url):
         return url.split('/')[4]
+    
+    def get_user_searches(self, username):
+        user_searches = self.user_searches[self.user_searches['Username'] == username]
+        if user_searches.empty:
+            return {"error": f"No searches found for user '{username}'."}
+        search_movies = user_searches['movie_title'].tolist()
+        return search_movies;

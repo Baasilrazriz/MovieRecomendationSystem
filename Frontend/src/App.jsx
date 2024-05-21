@@ -5,6 +5,7 @@ import { ToastContainer } from 'react-toastify'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import LandingPage from './Pages/LandingPage'
 import ProtectedRoutes from './Pages/ProtectRoutes/ProtectedRoutes'
+import NotFound from './Pages/NotFound'
 
 function App() {
 
@@ -15,8 +16,10 @@ function App() {
    <Routes>
     <Route path="/" element={<LandingPage/>}/>
     <Route path="/login" element={<LoginPage/>}/>
+    <Route path='*' element={<NotFound/>}/>
     <Route element={<ProtectedRoutes/>} >
     <Route path='/home' element={<  HomePage/>}/>
+    
       </Route>    
    </Routes>
    </BrowserRouter>

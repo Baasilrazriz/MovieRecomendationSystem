@@ -35,12 +35,9 @@ export const recommendMoviesByCategory = createAsyncThunk(
 
 export const recommendMoviesByName = createAsyncThunk(
   "movies/recommendMoviesByName",
-  async ({ movieName, rememberMe }, { rejectWithValue }) => {
+  async ({ movieName }, { rejectWithValue }) => {
     try {
-      const cachedMovies = localStorage.getItem("recommendationByName");
-      if (cachedMovies) {
-        return JSON.parse(cachedMovies);
-      }
+      
 
       
       
@@ -52,12 +49,7 @@ export const recommendMoviesByName = createAsyncThunk(
 
       // Get rememberMe from loginSlice
 
-      if (rememberMe) {
-        localStorage.setItem(
-          "recommendationByName",
-          JSON.stringify(response.data)
-        );
-      }
+      
 
       return response.data;
     } catch (error) {
@@ -141,9 +133,10 @@ const movieSlice = createSlice({
       state.selectedMovie = action.payload;
       document.body.style.overflowY = "hidden";  
     },
-    closeModal: (state,action) => {
+    closeModal: (state) => {
       state.isOpen = false;
       state.selectedMovie = null;
+      state.moviesByName=[]
       document.body.style.overflowY = "scroll";  
       
     },
@@ -185,13 +178,16 @@ const movieSlice = createSlice({
       })
       .addCase(recommendMoviesByName.pending, (state) => {
         state.statusRecommendedMoviesByName = "loading";
+        console.log(state.statusRecommendedMoviesByName)
       })
       .addCase(recommendMoviesByName.fulfilled, (state, action) => {
         state.statusRecommendedMoviesByName = "succeeded";
-        state.moviesByName = action.payload;
+        console.log(state.statusRecommendedMoviesByName)
+        state.moviesByName = action.payload.recommendations;
       })
       .addCase(recommendMoviesByName.rejected, (state, action) => {
         state.statusRecommendedMoviesByName = "failed";
+        console.log(state.statusRecommendedMoviesByName)
         state.error = action.error.message;
       })
   },

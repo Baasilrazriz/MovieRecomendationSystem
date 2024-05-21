@@ -94,6 +94,13 @@ def get_poster_url_from_title():
             return jsonify({"message": f"No poster found for movie '{movie_title}'."}), 404
     else:
         return jsonify({"message": "Movie title parameter is required."}), 400
+@app.route('/user_searches', methods=['GET'])
+def user_searches():
+    username = request.args.get('username')
+    if not username:
+        return jsonify({"error": "Username parameter is required."}), 400
+    searches = system.get_user_searches(username)
+    return jsonify(searches), 200
 
 if __name__ == "__main__":
     app.run(debug=True)

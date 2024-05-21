@@ -1,12 +1,18 @@
 // src/Component/CarouselSection.jsx
 import React, { memo } from 'react';
 import Slider from 'react-slick';
-import { useDispatch } from 'react-redux';
-import { openModal } from '../Store/Features/movieSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { openModal, recommendMoviesByName } from '../Store/Features/movieSlice';
+import { record_movie_history } from '../Store/Features/searchSlice';
 
 const CarouselSection = ({ title, movies }) => {
   const dispatch = useDispatch();
-  
+  const statusRecommendedMoviesByName = useSelector(
+    (state) => state.movie.statusRecommendedMoviesByName
+  );  
+  const statusRecord = useSelector(
+    (state) => state.search.statusRecord
+  );  
   const settings = {
     dots: false,
     infinite: false,
@@ -31,8 +37,18 @@ const CarouselSection = ({ title, movies }) => {
     ]
   };
 
+
   const handleMovieClick = (movie) => {
     dispatch(openModal(movie));
+    if (statusRecommendedMoviesByName === "idle"||statusRecommendedMoviesByName === "succeeded") {
+      if (movie) {
+        dispatch(
+          recommendMoviesByName({
+            movieName: movie.movie_title
+          })
+        );
+      }
+    }
   };
 
   return (
