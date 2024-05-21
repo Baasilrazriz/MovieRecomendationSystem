@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-
-  export const recommendMoviesByCategory = createAsyncThunk(
+export const recommendMoviesByCategory = createAsyncThunk(
   "movies/recommendMoviesByCategory",
   async ({ categories, rememberMe }, { rejectWithValue }) => {
     try {
@@ -20,8 +19,6 @@ import axios from "axios";
         }
       }
 
-      // Get rememberMe from loginSlice
-
       if (rememberMe) {
         localStorage.setItem(
           "moviesByCategory",
@@ -31,10 +28,11 @@ import axios from "axios";
 
       return moviesByCategoryTemp;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(error.response?.data?.message || error.message);
     }
   }
 );
+
 export const recommendMoviesByName = createAsyncThunk(
   "movies/recommendMoviesByName",
   async ({ movieName, rememberMe }, { rejectWithValue }) => {
@@ -71,11 +69,11 @@ export const recommendedMovies = createAsyncThunk(
   "movies/recommendedMovies",
   async ({rememberMe},{ rejectWithValue }) => {
     try {
+      
       const cachedMovies = localStorage.getItem("recommendedmovies");
       if (cachedMovies) {
         return JSON.parse(cachedMovies);
       }
-
       const response = await axios.get(
         `http://127.0.0.1:5000/recommend_movies`
       );
@@ -86,29 +84,29 @@ export const recommendedMovies = createAsyncThunk(
           JSON.stringify(response.data)
         );
       }
-
+console.log(response.data)
       return response.data;
     } catch (error) {
       return rejectWithValue(error.message);
     }
   }
 );
-export const InitialRecommendedMovies = createAsyncThunk(
-  "movies/InitialRecommendedMovies",
+export const top_rated_movies = createAsyncThunk(
+  "movies/top_rated_movies",
   async ({rememberMe},{ rejectWithValue }) => {
     try {
-      const cachedMovies = localStorage.getItem("initialrecommendation");
+      const cachedMovies = localStorage.getItem("top_rated_movies");
       if (cachedMovies) {
         return JSON.parse(cachedMovies);
       }
 
       const response = await axios.get(
-        `http://127.0.0.1:5000/initial_recommendation`
+        `http://127.0.0.1:5000/top_rated_movies`
       );
 
       if (rememberMe) {
         localStorage.setItem(
-          "initialrecommendation",
+          "top_rated_movies",
           JSON.stringify(response.data)
         );
       }
@@ -125,57 +123,64 @@ const movieSlice = createSlice({
   name: "movie  ",
   initialState: {
     moviesByCategory: {},
-    moviesByName: {},
-    recommendMovies: {},
-    initialRecommendMovies: {},
+    moviesByName: [],
+    MoviesRecommended: [],
+    MoviesTopRated: [],
     statusCatMovies: "idle",
-    statusRecommendedMovies: "",
-    statusRecommendedMoviesByName: "",
-    statusInitialRecommendedMovies: "",
+    statusRecommendedMovies: "idle",
+    statusRecommendedMoviesByName: "idle",
+    statusMoviesTopRated: "idle",
     error: null,
     isOpen: false,
+    selectedMovie: null,
+
   },
   reducers: {
-    openModal: (state) => {
+    openModal: (state,action) => {
       state.isOpen = true;
+      state.selectedMovie = action.payload;
+      document.body.style.overflowY = "hidden";  
     },
-    closeModal: (state) => {
+    closeModal: (state,action) => {
       state.isOpen = false;
+      state.selectedMovie = null;
+      document.body.style.overflowY = "scroll";  
+      
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(recommendMoviesByCategory.pending, (state) => {
-        state.status = "loading";
-      })
-      .addCase(recommendMoviesByCategory.fulfilled, (state, action) => {
-        state.status = "succeeded";
-        state.moviesByCategory = action.payload;
-      })
-      .addCase(recommendMoviesByCategory.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.error.message;
-      })
+    .addCase(recommendMoviesByCategory.pending, (state) => {
+      state.statusCatMovies = "loading";
+    })
+    .addCase(recommendMoviesByCategory.fulfilled, (state, action) => {
+      state.statusCatMovies = "succeeded";
+      state.moviesByCategory = action.payload;
+    })
+    .addCase(recommendMoviesByCategory.rejected, (state, action) => {
+      state.statusCatMovies = "failed";
+      state.error = action.payload;
+    })    
       .addCase(recommendedMovies.pending, (state) => {
         state.statusRecommendedMovies = "loading";
       })
       .addCase(recommendedMovies.fulfilled, (state, action) => {
         state.statusRecommendedMovies = "succeeded";
-        state.recommendMovies = action.payload;
+        state.MoviesRecommended = action.payload;
       })
       .addCase(recommendedMovies.rejected, (state, action) => {
         state.statusRecommendedMovies = "failed";
         state.error = action.error.message;
       })
-      .addCase(InitialRecommendedMovies.pending, (state) => {
-        state.statusInitialRecommendedMovies = "loading";
+      .addCase(top_rated_movies.pending, (state) => {
+        state.statusMoviesTopRated = "loading";
       })
-      .addCase(InitialRecommendedMovies.fulfilled, (state, action) => {
-        state.statusInitialRecommendedMovies = "succeeded";
-        state.initialRecommendMovies = action.payload;
+      .addCase(top_rated_movies.fulfilled, (state, action) => {
+        state.statusMoviesTopRated = "succeeded";
+        state.MoviesTopRated = action.payload;
       })
-      .addCase(InitialRecommendedMovies.rejected, (state, action) => {
-        state.statusInitialRecommendedMovies = "failed";
+      .addCase(top_rated_movies.rejected, (state, action) => {
+        state.statusMoviesTopRated = "failed";
         state.error = action.error.message;
       })
       .addCase(recommendMoviesByName.pending, (state) => {

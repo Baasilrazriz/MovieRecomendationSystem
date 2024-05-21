@@ -1,9 +1,10 @@
 // src/components/Header.jsx
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Cookies from 'js-cookie';
-import { setRememberMe, toggleUserDropdown } from '../Store/Features/loginSlice';
+import { toggleUserDropdown, CloseUserDropdown, setRememberMe } from '../Store/Features/loginSlice';
 const Header = () => {
+  const [isScrolled, setIsScrolled] = useState(false);
     const dispatch = useDispatch();
     const isLoggedIn = useSelector((state) => state.login.isLoggedIn);
     console.log("login:"+isLoggedIn)
@@ -17,7 +18,7 @@ const Header = () => {
               
           // Close the user dropdown if a click occurs outside of it
           if (userDropdownRef.current && !userDropdownRef.current.contains(event.target)) {
-            dispatch(toggleUserDropdown());
+            dispatch(CloseUserDropdown());
           }
         }
         window.addEventListener('click', handleClickOutside)
@@ -31,6 +32,9 @@ const Header = () => {
         Cookies.remove("username")
         Cookies.remove("profilePic")
         localStorage.removeItem('moviesByCategory');
+        localStorage.removeItem('recommendedmovies');
+        localStorage.removeItem('initialrecommendation');
+        localStorage.removeItem('recommendationByName');
 
         dispatch(setRememberMe(false))
         window.location.reload();
@@ -38,17 +42,27 @@ const Header = () => {
       const handleOpenLoginModal = () => {
           dispatch(toggleUserDropdown());
       };
+
+      useEffect(() => {
+        const handleScroll = () => {
+          setIsScrolled(window.scrollY > 0); // Check if scrolled past top
+        };
     
+        window.addEventListener('scroll', handleScroll);
+    
+        return () => window.removeEventListener('scroll', handleScroll); // Cleanup
+      }, []);
   return (
-    <header className="bg-transparent py-4 px-8 flex items-center justify-between">
-      <div className="text-red-600 text-3xl font-bold">BASFLIX</div>
-      <nav className="space-x-4 text-white">
-        <a href="#" className="hover:underline">Home</a>
-        <a href="#" className="hover:underline">TV Shows</a>
-        <a href="#" className="hover:underline">Movies</a>
-        <a href="#" className="hover:underline">New & Popular</a>
-        <a href="#" className="hover:underline">My List</a>
-        <a href="#" className="hover:underline">Browse by Languages</a>
+    <header className={`${isScrolled ? 'backdrop-blur-xl' : 'backdrop-blur-sm'} bg-transparent z-[11] fixed top-0 py-4 px-8  w-screen`}>
+      <div className='flex items-center  justify-between '>
+      <a href='/' className="text-red-600 hover:scale-125 text-3xl font-bold">BASFLIX</a>
+      <nav className="space-x-5 text-white text-lg   font-semibold">
+        <a href="#" className=" hover:font-bold hover:text-xl hover:drop-shadow-xl hover:shadow-black hover:text-red-600">Home</a>
+        <a href="#" className=" hover:font-bold hover:text-xl hover:drop-shadow-xl hover:shadow-black hover:text-red-600">TV Shows</a>
+        <a href="#" className=" hover:font-bold hover:text-xl hover:drop-shadow-xl hover:shadow-black hover:text-red-600">Movies</a>
+        <a href="#" className=" hover:font-bold hover:text-xl hover:drop-shadow-xl hover:shadow-black hover:text-red-600">New & Popular</a>
+        <a href="#" className=" hover:font-bold hover:text-xl hover:drop-shadow-xl hover:shadow-black hover:text-red-600">My List</a>
+        <a href="#" className=" hover:font-bold hover:text-xl hover:drop-shadow-xl hover:shadow-black hover:text-red-600">Browse by Languages</a>
       </nav>
       <div className="relative flex-col " ref={userDropdownRef}>
             <button className="w-10 h-10 rounded-full overflow-hidden" onClick={handleOpenLoginModal}>
@@ -122,6 +136,7 @@ const Header = () => {
               </div>
             )}
           </div>
+      </div>
     </header>
   );
 };

@@ -1,99 +1,82 @@
-import React from 'react';
+// src/Modal/MovieModal.jsx
+import React, { memo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-
 import { XIcon } from '@heroicons/react/solid';
 import { closeModal } from '../Store/Features/movieSlice';
+import HeroSection from '../Component/HeroSection';
 
 const MovieModal = () => {
   const dispatch = useDispatch();
   const isOpen = useSelector((state) => state.movie.isOpen);
-  const movieData =  {
-    title: 'House of Ninjas',
-    year: '2024',
-    rating: 'TV-MA',
-    info: '3 Seasons',
-    ranking: '#2 in TV Shows Today',
-    description: 'Years after retiring from their formidable ninja lives, a dysfunctional family must return to shadowy missions to counteract a string of looming threats.',
-    cast: ['Kento Kaku', 'Yosuke Eguchi', 'Tae Kimura'],
-    genres: ['TV Dramas', 'Japanese', 'TV Thrillers'],
-    thisShowIs: ['Dark', 'Suspenseful', 'Exciting'],
-    maturityRating: 'TV-MA',
-    tags: ['smoking', 'violence'],
-    similarMovies: [
-      { title: 'Rurouni Kenshin', img: 'https://via.placeholder.com/150', rating: 'TV-MA', year: '2021' },
-      { title: 'Oldboy', img: 'https://via.placeholder.com/150', rating: 'TV-MA', year: '2021' },
-      // Add more similar movies as needed
-    ],
-  };
-
-
-  if (!isOpen) return null;
+  const selectedMovie = useSelector((state) => state.movie.selectedMovie);
+console.log(selectedMovie)
+  if (!isOpen || !selectedMovie) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-      <div className="relative bg-black text-white max-w-4xl w-full p-8 rounded-lg overflow-y-auto max-h-[90vh]">
+      <div className="relative bg-transparent backdrop-blur-xl text-white max-w-4xl w-full rounded-lg">
         <button onClick={() => dispatch(closeModal())} className="absolute top-4 right-4">
-          <XIcon className="h-6 w-6 text-white" />
+          <XIcon className="h-7 w-7 text-white bg-red-600 z-[99999] fixed top-2 border-2 rounded-full right-6" />
         </button>
-        <div>
-         <div className='h- w-full overflow-hidden'>
-         <img 
-            src="https://m.media-amazon.com/images/M/MV5BODM0ODg1NDI0NF5BMl5BanBnXkFtZTcwMjk0NzA0MQ@@._V1_SX300.jpg" 
-            alt="House of Ninjas" 
-            className="w-full h-full object-cover rounded-md mb-4"
-          />
-           </div>
-            <div>
-         <h2 className="text-4xl font-bold mb-2">{movieData.title}</h2>
-      <div className="flex items-center space-x-2 text-sm mb-4">
-        <span>{movieData.year}</span>
-        <span>•</span>
-        <span>{movieData.rating}</span>
-        <span>•</span>
-        <span>{movieData.info}</span>
-        <span>•</span>
-        <span>{movieData.ranking}</span>
-      </div>
+        <div className='overflow-hidden overflow-y-auto max-h-[90vh]'>
+          <div className='h-[43rem] overflow-hidden w-full'>  
+            <div className='w-full flex'>
+              <div className='w-1/2  flex  justify-center items-center' >
+              <div className="z-10 p-8 text-white max-w-md">
+          <h1 className="text-5xl font-bold">{selectedMovie.movie_title || "HOUSE OF NINJAS"}</h1>
+          <p className="mt-4 text-lg">Years after retiring from their ninja lives, a dysfunctional family must return to the shadows...</p>
+          <div className="mt-4 space-x-2 flex justify-center" >
+            <a  className="bg-gradient-to-r from-red-800 to-red-600    text-white font-bold  px-44 py-4 rounded-md hover:scale-95 hover:bg-gradient-to-r hover:from-red-600 hover:to-red-500" href={selectedMovie.movie_imdb_link || "http://www.imdb.com/title/tt0325980/?ref_=fn_tt_tt_1"} >Play</a>
+            
           </div>
-          <p className="mb-4">{movieData.description}</p>
-      <div className="mb-4">
-        <h3 className="font-semibold">Cast:</h3>
-        <p>{movieData.cast.join(', ')}</p>
-      </div>
-      <div className="mb-4">
-        <h3 className="font-semibold">Genres:</h3>
-        <p>{movieData.genres.join(', ')}</p>
-      </div>
-      <div className="mb-4">
-        <h3 className="font-semibold">This show is:</h3>
-        <p>{movieData.thisShowIs.join(', ')}</p>
-      </div>
-      <div className="mb-4">
-        <h3 className="font-semibold">Maturity rating:</h3>
-        <p>{movieData.maturityRating}</p>
-      </div>
-      <div className="mb-4">
-        <h3 className="font-semibold">Tags:</h3>
-        <p>{movieData.tags.join(', ')}</p>
-      </div>
-      <div>
-      <h3 className="font-semibold mb-2">More Like This:</h3>
-      <div className="grid grid-cols-3 gap-4">
-        {movieData.similarMovies.map((movie, index) => (
-          <div key={index} className="flex flex-col items-center">
-            <img src={movie.img} alt={movie.title} className="w-full rounded-md mb-2" />
-            <div className="text-center">
-              <h4 className="font-semibold">{movie.title}</h4>
-              <p className="text-sm text-gray-400">{movie.rating} • {movie.year}</p>
+        </div>
+              </div>
+              <div className='h-[40rem] w-1/2'>
+              <img className='h-full w-full object-cover' src={selectedMovie.poster_url} alt="" srcset="" />
+              </div>
             </div>
           </div>
-        ))}
-      </div>
-    </div>
+          <div className='px-10 py-4'>
+            {/* <h2 className="text-4xl font-bold mb-2">{selectedMovie.movie_title}</h2> */}
+            <div className="flex items-center space-x-2 text-md mb-4">
+              <span>{selectedMovie.title_year}</span>
+              <span>•</span>
+              <span>{selectedMovie.imdb_score}</span>
+              <span>•</span>
+              <span>{selectedMovie.content_rating}</span>
+            </div>
+             {/* <div className="mb-4">
+                    <h3 className="font-semibold">Description:</h3>
+                    <p>{selectedMovie.description}</p>
+                  </div>  */}
+                  <div className="mb-4">
+                    <h3 className="font-semibold">Director Name:</h3>
+                    <p>{selectedMovie.director_name}</p>
+                  </div>
+                  <div className="mb-4">
+                    <h3 className="font-semibold">Cast:</h3>
+                    <p>{selectedMovie.actor_1_name},{selectedMovie.actor_2_name},{selectedMovie.actor_3_name}</p>
+                  </div>
+                  <div className="mb-4">
+                    <h3 className="font-semibold">Genres:</h3>
+                    <p>{selectedMovie.genres.replace(/\|/g, ',')}</p>
+                  </div>
+                  <div className="mb-4">
+                    <h3 className="font-semibold">This show is:</h3>
+                    <p>{selectedMovie.plot_keywords.replace(/\|/g, ',')}</p>
+                  </div>
+                  <div className="mb-4">
+                    <h3 className="font-semibold">Maturity rating:</h3>
+                    <p>{selectedMovie.content_rating}</p>
+                  </div>
+                  <div className="">
+                    {/* <CarouselSection title="More Like This:" movies={selectedMovie.similarMovies || []} /> */}
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default MovieModal;
+export default memo(MovieModal);

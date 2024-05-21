@@ -83,10 +83,10 @@ class MovieRecommendationSystem:
         similarity_scores = cosine_similarity(movie_tfidf, all_movies_tfidf)
 
         # Get indices of top 6 similar movies (including the input movie itself)
-        top_indices = similarity_scores.argsort(axis=1)[:, ::-1][:, :6]
+        top_indices = similarity_scores.argsort(axis=1)[:, ::-1][:, :11]
 
         # Print recommended movies with all metadata including poster URLs
-        print(f"Top 5 recommended movies for movie {movie_name}:")
+        print(f"Top 10 recommended movies for movie {movie_name}:")
         for i, index in enumerate(top_indices[0]):  # Only take the first 6 indices
             if i == 0:  # Skip the first index because it's the input movie itself
                 continue
@@ -126,11 +126,11 @@ class MovieRecommendationSystem:
             similarity_scores = cosine_similarity(user_tfidf, movie_tfidf)
 
             # Get indices of top 5 similar movies
-            top_indices = similarity_scores.argsort(axis=1)[:, ::-1][:, 1:6]
+            top_indices = similarity_scores.argsort(axis=1)[:, ::-1][:, 1:11]
             
              # Print recommended movies with all metadata including poster URLs
             print(f"Top 5 recommended movies for user {self.logged_in_user}:")
-            for i, indices in enumerate(top_indices[0][:5]):  # Only take the first 5 indices
+            for i, indices in enumerate(top_indices[0][:10]):  # Only take the first 10 indices
                 movie_metadata = self.imdb_dataset.iloc[indices].to_dict()
                 poster_url = self.get_poster_url_from_title(movie_metadata['movie_title'])
                 movie_metadata['poster_url'] = poster_url
@@ -140,9 +140,48 @@ class MovieRecommendationSystem:
         else:
             recommendations['error'] = "Please login first."
         return recommendations
+    
+    def top_rated_movies(self):
+        top_movies = {}
 
+        # Sort the dataset by the 'rating' column in descending order
+        sorted_movies = self.imdb_dataset.sort_values(by='imdb_score', ascending=False)
+
+        # Get the top 5 movies
+        top_10_movies = sorted_movies.head(10)
+
+        for i, (_, movie) in enumerate(top_10_movies.iterrows()):
+            movie_metadata = movie.to_dict()
+            poster_url = self.get_poster_url_from_title(movie_metadata['movie_title'])
+            movie_metadata['poster_url'] = poster_url
+            top_movies[i] = movie_metadata
+
+        return top_movies
     def initial_recommendation(self):
-        recommendations = {}
+        init_recommendations = {}
+
+        # Concatenate all features into a single string for each movie in the IMDb dataset
+        movie_features_str = self.imdb_dataset.apply(lambda x: ' '.join(x.fillna('').astype(str)), axis=1)
+
+        # Fit TF-IDF vectorizer on movie features
+        movie_tfidf = self.tf_idf_vectorizer.fit_transform(movie_features_str)
+
+        # Calculate cosine similarity between all pairs of movies
+        similarity_scores = cosine_similarity(movie_tfidf)
+
+        # Get indices of top 10 similar movies for each movie
+        top_indices = similarity_scores.argsort(axis=1)[:, ::-1][:, 1:11]
+        
+        print("Top 5 initial recommended movies:")
+        for i, indices in enumerate(top_indices[0][:10]):  # Only take the first 10 indices
+           movie_metadata = self.imdb_dataset.iloc[indices].to_dict()
+           poster_url = self.get_poster_url_from_title(movie_metadata['movie_title'])
+           movie_metadata['poster_url'] = poster_url
+           init_recommendations[i] = movie_metadata
+        return init_recommendations
+
+ 
+        init_recommendations = {}
 
         # Concatenate all features into a single string for each movie in the IMDb dataset
         movie_features_str = self.imdb_dataset.apply(lambda x: ' '.join(x.fillna('').astype(str)), axis=1)
@@ -161,8 +200,8 @@ class MovieRecommendationSystem:
            movie_metadata = self.imdb_dataset.iloc[indices].to_dict()
            poster_url = self.get_poster_url_from_title(movie_metadata['movie_title'])
            movie_metadata['poster_url'] = poster_url
-           recommendations[i] = movie_metadata
-        return recommendations
+           init_recommendations[i] = movie_metadata
+        return init_recommendations
 
     def record_user_history(self, movie_name):
         # Search for the movie in the IMDb dataset
@@ -191,7 +230,7 @@ class MovieRecommendationSystem:
         filtered_movies = self.imdb_dataset[self.imdb_dataset['genres'].str.contains(category, case=False, na=False)]
     
         # Get the top 5 movies that match the category
-        top_10_movies = filtered_movies.head(5)
+        top_10_movies = filtered_movies.head(10)
     
         # Return the metadata of the filtered movies
         print(f"Top 5 movies in category '{category}':")

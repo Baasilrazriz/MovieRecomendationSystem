@@ -44,10 +44,10 @@ def recommend_movies():
     else:
         return jsonify({"message": "Please login first."}), 403
 
-@app.route('/initial_recommendation', methods=['GET'])
-def initial_recommendation():
-    recommendations = system.initial_recommendation()
-    return jsonify(recommendations), 200
+@app.route('/top_rated_movies', methods=['GET'])
+def get_top_rated_movies():
+    movies = system.top_rated_movies()
+    return jsonify(movies)
 
 @app.route('/record_user_history', methods=['POST'])
 def record_user_history():

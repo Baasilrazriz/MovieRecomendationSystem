@@ -29,7 +29,6 @@ function LoginPage() {
   
   useEffect( () => {
     // Check if user is already logged in via cookies
-
     const loggedIn = Cookies.get("loggedIn");
     const username = Cookies.get("username");
     const profilePic = Cookies.get("profilePic");

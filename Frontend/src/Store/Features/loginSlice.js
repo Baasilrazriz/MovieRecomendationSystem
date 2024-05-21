@@ -51,12 +51,12 @@ const loginSlice = createSlice({
       state.error = action.payload;
     },
 
-    // OpenUserDropdown: (state) => {
-    //     state.userDropdownOpen = true;
-    //   },
-    //   CloseUserDropdown:(state)=>{
-    //     state.userDropdownOpen = false;
-    //   },
+    OpenUserDropdown: (state) => {
+        state.userDropdownOpen = true;
+      },
+      CloseUserDropdown:(state)=>{
+        state.userDropdownOpen = false;
+      },
     toggleUserDropdown: (state, action) => {
       state.userDropdownOpen = !state.userDropdownOpen;
     },
@@ -99,5 +99,7 @@ export const {
   toggleUserDropdown,
   setProfilePic,
   setUsername,
+  OpenUserDropdown,
+  CloseUserDropdown   
 } = loginSlice.actions;
 export default loginSlice.reducer;

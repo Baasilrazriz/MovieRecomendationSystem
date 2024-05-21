@@ -1,89 +1,71 @@
-import React, { useEffect, useState } from 'react';
+// src/Pages/HomePage.jsx
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import CarouselSection from '../Component/CarouselSection';
 import HeroSection from '../Component/HeroSection';
 import Header from '../Component/Header';
-import { useDispatch, useSelector } from 'react-redux';
 import MovieModal from '../Modal/MovieModal';
-import { InitialRecommendedMovies, recommendMoviesByCategory, recommendedMovies } from '../Store/Features/movieSlice';
-
+import { recommendMoviesByCategory, recommendedMovies, top_rated_movies } from '../Store/Features/movieSlice';
+import LoadingScreen from '../Component/LoadingScreen';
 
 function HomePage() {
   const dispatch = useDispatch();
   const moviesByCategory = useSelector(state => state.movie.moviesByCategory);
-  const initialRecommendMovies = useSelector(state => state.movie.moviesByCategory);
-  const recommendMovies = useSelector(state => state.movie.moviesByCategory);
+  const MoviesTopRated = useSelector(state => state.movie.MoviesTopRated);
+  const recommendMovies = useSelector(state => state.movie.MoviesRecommended);
   const statusRecommendedMovies = useSelector(state => state.movie.statusRecommendedMovies);
-  const statusInitialRecommendedMovies = useSelector(state => state.movie.statusInitialRecommendedMovies);
+  const statusMoviesTopRated = useSelector(state => state.movie.statusMoviesTopRated);
   const statusCatMovies = useSelector(state => state.movie.statusCatMovies);
   const error = useSelector(state => state.movie.error);
-  const bgHero = useSelector((state) => state.home.bgHero);
-  const [loading, setLoading] = useState(false);
-  
+  const bgHero = useSelector(state => state.home.bgHero);
+  const rememberMe = useSelector(state => state.login.rememberMe);
 
   const categories = [
-    "Action",
-    "Adventure",
-    "Animation",
-    "Biography",
-    "Comedy",
-    "Crime",
-    "Documentary",
-    "Drama",
-    "Family",
-    "Fantasy",
-    "History",
-    "Horror",
-    "Music",
-    "Musical",
-    "Mystery",
-    "Romance",
-    "Sci-Fi",
-    "Sport",
-    "Thriller",
-    "War",
-    "Western"
+    "Action", "Adventure", "Animation", "Biography", "Comedy", "Crime", "Documentary",
+    "Drama", "Family", "Fantasy", "History", "Horror", "Music", "Musical",
+    "Mystery", "Romance", "Sci-Fi", "Sport", "Thriller", "War", "Western"
   ];
-  const rememberMe = useSelector((state) => state.login.rememberMe);
-  useEffect( () => {
-    
+
+  useEffect(() => {
     if (statusCatMovies === 'idle') {
-      
-      dispatch(recommendMoviesByCategory(categories,rememberMe));
+      dispatch(recommendMoviesByCategory({ categories, rememberMe }));
     }
-    if (statusRecommendedMovies === '') {
-
-      dispatch(recommendedMovies(rememberMe));
+    if (statusRecommendedMovies === 'idle') {
+      dispatch(recommendedMovies({ rememberMe }));
     }
-      if (statusInitialRecommendedMovies === 'idle') {
+    if (statusMoviesTopRated === 'idle') {
+      dispatch(top_rated_movies({ rememberMe }));
+    }
+  }, [dispatch, statusCatMovies, statusRecommendedMovies, statusMoviesTopRated, categories, rememberMe]);
 
-        dispatch(InitialRecommendedMovies(rememberMe));
-      }
-    
-   
-  
-  }, [dispatch]);
-  console.log(recommendMovies)
-  if (loading) {
-    return <div>Loading...</div>;
+  const isLoading = statusCatMovies === 'loading' ||
+    statusRecommendedMovies === 'loading' ||
+    statusMoviesTopRated === 'loading';
+
+  if (isLoading) {
+    return <div>
+      <LoadingScreen />
+    </div>;
   }
 
   if (error) {
-    return <div>{error}</div>;
+    return <div>Error: {error}</div>;
   }
 
   return (
     <>
       <div className="bg-black min-h-screen">
-        <div style={{ backgroundImage: `${bgHero}` }}>
+        <div>
           <Header />
-          <HeroSection />
+          <div className=''>
+            <HeroSection page="home" movie={recommendMovies[2]||[]}/>
+          </div>
         </div>
-
         <div className="px-8">
-        {/* <CarouselSection title="Matched to You" movies={recommendMovies} />
-        <CarouselSection title="Top 10 movies in the U.S. Today" movies={initialRecommendMovies} /> */}
+          <CarouselSection title="Matched to You" movies={recommendMovies || []} />
+          <CarouselSection title="Top 5 movies in your Region Today" movies={MoviesTopRated || {}} />
           {categories.map((category) => (
-            <CarouselSection key={category} title={category} movies={moviesByCategory[category] || []} />
+            <CarouselSection key={category} title={category} movies={moviesByCategory[category] || {}} />
           ))}
         </div>
       </div>
