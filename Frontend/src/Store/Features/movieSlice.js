@@ -37,20 +37,10 @@ export const recommendMoviesByName = createAsyncThunk(
   "movies/recommendMoviesByName",
   async ({ movieName }, { rejectWithValue }) => {
     try {
-      
-
-      
-      
         const response = await axios.get(
           `http://127.0.0.1:5000/recommendMoviesByname?movie_name=${movieName}`
         );
-       
-      
-
-      // Get rememberMe from loginSlice
-
-      
-
+        console.log("movie by name caled")
       return response.data;
     } catch (error) {
       return rejectWithValue(error.message);
@@ -76,7 +66,31 @@ export const recommendedMovies = createAsyncThunk(
           JSON.stringify(response.data)
         );
       }
-console.log(response.data)
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+export const userHistory = createAsyncThunk(
+  "movies/userHistory",
+  async ({rememberMe},{ rejectWithValue }) => {
+    try {
+      
+      const cachedMovies = localStorage.getItem("userHistory");
+      if (cachedMovies) {
+        return JSON.parse(cachedMovies);
+      }
+      const response = await axios.get(
+        `http://127.0.0.1:5000/user_history`
+      );
+
+      if (rememberMe) {
+        localStorage.setItem(
+          "userHistory",
+          JSON.stringify(response.data)
+        );
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.message);
@@ -118,12 +132,15 @@ const movieSlice = createSlice({
     moviesByName: [],
     MoviesRecommended: [],
     MoviesTopRated: [],
+    movieUserHistory: [],
     statusCatMovies: "idle",
+    statusmovieUserHistory: "idle",
     statusRecommendedMovies: "idle",
     statusRecommendedMoviesByName: "idle",
     statusMoviesTopRated: "idle",
     error: null,
     isOpen: false,
+    isHistory: false,
     selectedMovie: null,
 
   },
@@ -138,6 +155,14 @@ const movieSlice = createSlice({
       state.selectedMovie = null;
       state.moviesByName=[]
       document.body.style.overflowY = "scroll";  
+      
+    },
+    deactiveHistory: (state) => {
+      state.isHistory = false;
+      
+    },
+  activeHistory: (state) => {
+      state.isHistory = true;
       
     },
   },
@@ -165,6 +190,17 @@ const movieSlice = createSlice({
         state.statusRecommendedMovies = "failed";
         state.error = action.error.message;
       })
+      .addCase(userHistory.pending, (state) => {
+        state.statusmovieUserHistory = "loading";
+      })
+      .addCase(userHistory.fulfilled, (state, action) => {
+        state.statusmovieUserHistory = "succeeded";
+        state.movieUserHistory = action.payload;
+      })
+      .addCase(userHistory.rejected, (state, action) => {
+        state.statusmovieUserHistory = "failed";
+        state.error = action.error.message;
+      })
       .addCase(top_rated_movies.pending, (state) => {
         state.statusMoviesTopRated = "loading";
       })
@@ -182,6 +218,7 @@ const movieSlice = createSlice({
       })
       .addCase(recommendMoviesByName.fulfilled, (state, action) => {
         state.statusRecommendedMoviesByName = "succeeded";
+        
         console.log(state.statusRecommendedMoviesByName)
         state.moviesByName = action.payload.recommendations;
       })
@@ -192,5 +229,5 @@ const movieSlice = createSlice({
       })
   },
 });
-export const { openModal, closeModal } = movieSlice.actions;
+export const { openModal, closeModal,activeHistory,deactiveHistory } = movieSlice.actions;
 export default movieSlice.reducer;

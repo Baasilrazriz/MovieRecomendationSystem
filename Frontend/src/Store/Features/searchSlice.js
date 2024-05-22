@@ -80,7 +80,7 @@ const searchSlice = createSlice({
       },
     deactiveSearch: (state) => {
         state.isSearchActive = false;
-        state.searchInput = "";
+        state.searchInput = ""; 
       },
     activeSearch: (state,action) => {
         state.isSearchActive = true;
@@ -94,7 +94,6 @@ const searchSlice = createSlice({
       })
       .addCase(fetchSuggestions.fulfilled, (state, action) => {
         state.status = "succeeded";
-        // Add any fetched suggestions to the array
         state.suggestions = action.payload;
       })
       .addCase(fetchSuggestions.rejected, (state, action) => {

@@ -1,5 +1,5 @@
 // src/Component/HeroSection.jsx
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { openModal, recommendMoviesByName } from '../Store/Features/movieSlice';
 
@@ -10,7 +10,7 @@ const HeroSection = (props) => {
   const statusRecommendedMoviesByName = useSelector(
     (state) => state.movie.statusRecommendedMoviesByName
   );
-  const handleMovieClick = (movie) => {
+  const handleMovieClick = useCallback((movie) => {
     dispatch(openModal(movie));
     if (statusRecommendedMoviesByName === "idle"||statusRecommendedMoviesByName === "succeeded") {
       if (movie) {
@@ -21,7 +21,7 @@ const HeroSection = (props) => {
         );
       }
     }
-  };
+  },[props.movie.movie_title]);
   return (
     <div className={`relative ${props.page === "home" ? "h-[85vh] bg-fill bg-center" : "h-[45vh] bg-cover bg-center "} `} style={{ backgroundImage: `${props.page==="home"?`${bgHero}`:`url(${image})`}` }}>
       <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>

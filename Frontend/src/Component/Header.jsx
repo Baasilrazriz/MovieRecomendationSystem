@@ -1,5 +1,5 @@
 // src/components/Header.jsx
-import React, { useEffect, useRef, useState } from "react";
+import React, { startTransition, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Cookies from "js-cookie";
 import {
@@ -8,6 +8,8 @@ import {
   setRememberMe,
 } from "../Store/Features/loginSlice";
 import { activeSearch, deactiveSearch, fetchSuggestions, on_change_search } from "../Store/Features/searchSlice";
+import { activeHistory, recommendMoviesByName, userHistory } from "../Store/Features/movieSlice";
+import { NavLink, useNavigate } from "react-router-dom";
 const Header = () => {
   const [search, setSearch] = useState("");
   
@@ -20,15 +22,14 @@ const Header = () => {
   const profilepic = useSelector((state) => state.login.profilepic);
   const username = useSelector((state) => state.login.username);
   const suggestions = useSelector((state) => state.search.suggestions);
-  const statusSearch = useSelector((state) => state.search.statusSearch);
+  const statusmovieUserHistory = useSelector((state) => state.movie.statusmovieUserHistory);
   const status = useSelector((state) => state.search.status);
   const userDropdownOpen = useSelector((state) => state.login.userDropdownOpen);
   const userDropdownRef = useRef(null);
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0); // New state variable
-
+  const navigate = useNavigate();
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // Close the user dropdown if a click occurs outside of it
       if (
         userDropdownRef.current &&
         !userDropdownRef.current.contains(event.target) &&
@@ -36,81 +37,88 @@ const Header = () => {
         !searchRef.current.contains(event.target)
       ) {
         dispatch(CloseUserDropdown());
-        setIsSearchActive(false); // Hide suggest
-      }  
-        
-    };  
+        setIsSearchActive(false);
+      }
+    };
     window.addEventListener("click", handleClickOutside);
-  });  
+    return () => {
+      window.removeEventListener("click", handleClickOutside);
+    };
+  }, [dispatch]);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 0);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
   // Attach the event listener to the window
 
   const handleSignOut = () => {
     Cookies.remove("loggedIn");
     Cookies.remove("username");
     Cookies.remove("profilePic");
-    localStorage.removeItem("moviesByCategory");
-    localStorage.removeItem("searchedmovies");
-    localStorage.removeItem("recommendedmovies");
-    localStorage.removeItem("initialrecommendation");
-    localStorage.removeItem("recommendationByName");
-
+    localStorage.clear();
     dispatch(setRememberMe(false));
     window.location.reload();
-  };  
-  const handleOpenLoginModal = () => {
-    dispatch(toggleUserDropdown());
-  };  
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 0); // Check if scrolled past top
-    };    
-
-    window.addEventListener("scroll", handleScroll);
-
-    return () => window.removeEventListener("scroll", handleScroll); // Cleanup
-  }, []);  
-    const handleSearchKeyDown = async(e) => {
-      if (e.key === "ArrowDown") {
-        // Move to next suggestion
-        setActiveSuggestionIndex((prevIndex) => Math.min(prevIndex + 1, suggestions.length - 1));
-      } else if (e.key === "ArrowUp") {
-        // Move to previous suggestion
-        setActiveSuggestionIndex((prevIndex) => Math.max(prevIndex - 1, 0));
-      } else if (e.key === "Enter") {
-        // Perform search with current suggestion
-        setIsSearchActive(false)  
-        const suggestion = suggestions[activeSuggestionIndex];
-        dispatch(activeSearch(suggestion))
-        setSearch(suggestion);
-        
-  if(statusSearch==="idle"||statusSearch==="succeeded")
-    {
- dispatch(on_change_search({search_input:suggestion}))
-    }
+  };
+  const  handlehistoryClick= async() => {
+    
+    if(statusmovieUserHistory==="idle")
+      {
+       await dispatch(userHistory(rememberMe))
+       
       }
-      else if (e.key === "Backspace" && search === "") {
-      dispatch(deactiveSearch());
-      setIsSearchActive(false);
+      
+      dispatch(CloseUserDropdown())
+      startTransition(() => {
+        navigate("/history")
+        }
+          )
+  };
+  const  handleFavClick= () => {
+      
+      dispatch(CloseUserDropdown())
+      startTransition(() => {
+        navigate("/favourites")
+        }
+          )
+  };
+  
+  const handleSearchKeyDown = (e) => {
+    if (e.key === "ArrowDown") {
+      setActiveSuggestionIndex((prevIndex) => Math.min(prevIndex + 1, suggestions.length - 1));
+    } else if (e.key === "ArrowUp") {
+      setActiveSuggestionIndex((prevIndex) => Math.max(prevIndex - 1, 0));
+    } else if (e.key === "Enter") {
+      const suggestion = suggestions[activeSuggestionIndex];
+      if (suggestion) {
+        performSearch(suggestion);
+      }
+    } else if (e.key === "Backspace"  ) {
+      if(search === "")
+        {
+          dispatch(deactiveSearch());
+          setIsSearchActive(false);
+        }
     }
-    };
+  };
     useEffect(() => {
       if (activeSuggestionIndex >= 0 && activeSuggestionIndex < suggestions.length) {
-        setSearch(suggestions[activeSuggestionIndex]);
+        
       }
-    }, [activeSuggestionIndex]);
-
-  const handleSearchChange = (e) => {
-    setSearch(e.target.value);
-    setIsSearchActive(true); // Show suggestions when search bar is clicked
-    if(status==="idle"||status==="succeeded")
-      {
-        dispatch(fetchSuggestions({ input: e.target.value,username ,rememberMe }));
+    }, [activeSuggestionIndex, suggestions]);
+  
+    const handleSearchChange = (e) => {
+      setSearch(e.target.value);
+      setIsSearchActive(true);
+      if (status === "idle" || status === "succeeded") {
+        dispatch(fetchSuggestions({ input: e.target.value, username, rememberMe }));
       }
-    // Replace this with your own logic to fetch suggestions
-    // setSuggestions(fetchSuggestions(e.target.value));
-  };
+    };
   const handleSearchClick= (e) => {
     setSearch(e.target.value);
     setIsSearchActive(true); // Show suggestions when search bar is clicked
@@ -119,14 +127,21 @@ const Header = () => {
          dispatch(fetchSuggestions({ input: e.target.value,username:username ,rememberMe:rememberMe }));
       }
   };
-
   const handleSuggestionClick = (suggestion) => {
     setSearch(suggestion);
-    
     performSearch(suggestion);
-
   };
-  console.log(suggestions)
+  const performSearch = (searchTerm) => {
+    setIsSearchActive(false);
+    dispatch(activeSearch(searchTerm));
+    
+    dispatch(on_change_search({ search_input: searchTerm }));
+    dispatch(recommendMoviesByName({ movieName: searchTerm }));
+  };
+  
+  const handleOpenLoginModal = () => {
+    dispatch(toggleUserDropdown());
+  };
   return (
     <header
       className={`${
@@ -134,9 +149,9 @@ const Header = () => {
       } bg-transparent z-[11] fixed top-0 py-4 px-8  w-screen`}
     >
       <div className="flex items-center  justify-between ">
-        <a href="/" className="text-red-600 hover:scale-125 text-3xl font-bold">
+        <NavLink to ="/home" className="text-red-600 hover:scale-125 text-3xl font-bold">
           BASFLIX
-        </a>
+        </NavLink>
         <div className="flex-1 flex justify-center mx-4" ref={searchRef}>
           <div className="relative w-full max-w-2xl">
             <input
@@ -191,7 +206,7 @@ const Header = () => {
                 className="h-full w-full object-fill"
                 src={profilepic}
                 alt=""
-                srcset=""
+                 
               />
             ) : (
               <svg
@@ -228,12 +243,16 @@ const Header = () => {
               </div>
               <ul class="py-2" aria-labelledby="user-menu-button">
                 <li>
-                  <button class="block text-nowrap w-full text-start px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
+                  <button 
+                                    onClick={handleFavClick}
+                  class="block text-nowrap w-full text-start px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
                     Your Favourite Movie
                   </button>
                 </li>
                 <li>
-                  <button class="block w-full text-start px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
+                  <button  
+                  onClick={handlehistoryClick}
+                  class="block w-full text-start px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
                     History
                   </button>
                 </li>

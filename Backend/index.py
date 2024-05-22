@@ -22,7 +22,13 @@ def login():
         return jsonify({"message": "Login successful."}), 200
     else:
         return jsonify({"message": "Invalid username or password."}), 401
-
+@app.route('/user_history', methods=['GET'])
+def get_user_history():
+    if system.logged_in_user:
+        history = system.get_user_history()
+        return jsonify(history), 200
+    else:
+        return jsonify({"error": "Please login first."}), 403
 @app.route('/recommendMoviesByname', methods=['GET'])
 def recommendMoviesByname():
     # Check if user is logged in
@@ -72,6 +78,7 @@ def movie_category_filter():
         return jsonify(filtered_movies), 200
     else:
         return jsonify({"message": "Category parameter is required."}), 400
+
 
 @app.route('/on_change_search', methods=['POST'])
 def on_change_search():

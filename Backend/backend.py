@@ -3,6 +3,7 @@ import pandas as pd
 import requests
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+import re
 
 
 class MovieRecommendationSystem:
@@ -19,7 +20,8 @@ class MovieRecommendationSystem:
 
     def load_user_history(self, path):
         return pd.read_csv(path, encoding='latin1')
-
+    
+    
     def load_user_searches(self, path):
         return pd.read_csv(path, encoding='latin1')
 
@@ -308,7 +310,39 @@ class MovieRecommendationSystem:
         
         print(f"No poster image found for movie ID '{imdb_id}'")
         return None
+    @staticmethod
+    def clean_movie_title(title):
+       """
+       Cleans the movie title by removing non-ASCII characters and extra spaces.
+       """
+       # Remove non-ASCII characters
+       title = re.sub(r'[^\x00-\x7F]+', '', title)
+       # Remove extra spaces
+       title = title.strip()
+       return title
 
+    def get_user_history(self):
+       history_movies = {}
+       if self.logged_in_user is None:
+           return {"error": "No user is currently logged in."}
+       
+       user_history = self.user_history[self.user_history['Username'] == self.logged_in_user]
+       
+       if user_history.empty:
+           return {"error": f"No history found for user '{self.logged_in_user}'."}
+       
+       user_history = user_history.head(10)
+       for i, movie in user_history.iterrows():
+           movie_metadata = movie.to_dict()
+           # Clean the movie title before getting the poster URL
+           cleaned_movie_title = MovieRecommendationSystem.clean_movie_title(movie_metadata['movie_title'])
+           poster_url = self.get_poster_url_from_title(cleaned_movie_title)
+           if poster_url is None:
+               poster_url = "path_to_default_poster_image.jpg"  # Fallback image URL
+           movie_metadata['poster_url'] = poster_url
+           history_movies[i] = movie_metadata
+       
+       return history_movies
     def extract_imdb_id(self, url):
         return url.split('/')[4]
     

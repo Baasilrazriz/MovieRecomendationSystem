@@ -1,5 +1,5 @@
 // src/Modal/MovieModal.jsx
-import React, { memo, useEffect } from "react";
+import React, { lazy, memo, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { XIcon } from "@heroicons/react/solid";
 import {
@@ -7,19 +7,18 @@ import {
   recommendMoviesByName,
 } from "../Store/Features/movieSlice";
 
-import CarouselSection from "../Component/CarouselSection";
+
+
 import { idleStatusRecord, record_movie_history } from "../Store/Features/searchSlice";
+import CarouselSection from "../Component/CarouselSection";
 
 const MovieModal = () => {
   const dispatch = useDispatch();
   const isOpen = useSelector((state) => state.movie.isOpen);
   const selectedMovie = useSelector((state) => state.movie.selectedMovie);
   const statusRecord = useSelector((state) => state.search.statusRecord);
-  // const statusRecommendedMoviesByName = useSelector(
-  //   (state) => state.movie.statusRecommendedMoviesByName
-  // );
   const moviesByName = useSelector((state) => state.movie.moviesByName);
-  const rememberMe = useSelector((state) => state.login.rememberMe);
+  
 
 useEffect(() => {
   
@@ -33,13 +32,13 @@ useEffect(() => {
         
     }
   
-  }, [isOpen,selectedMovie])  
+  }, [moviesByName])  
   const handleOnCLick = (e) => {
 
     dispatch(closeModal());
     dispatch(idleStatusRecord())
   };
-  console.log(selectedMovie);
+
   if (!isOpen || !selectedMovie) return null;
 
   return (
@@ -127,12 +126,13 @@ useEffect(() => {
                 selectedMovie?<CarouselSection
                 title="More Like This:"
                 movies={moviesByName }
-              />:<></>
+              />:<>
+              </>
               }
             </div>
           </div>
         </div>
-      </div>
+      </div>  
     </div>
   );
 };

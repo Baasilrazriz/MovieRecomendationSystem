@@ -1,14 +1,27 @@
 // src/Component/CarouselSection.jsx
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import Slider from 'react-slick';
 import { useDispatch, useSelector } from 'react-redux';
 import { openModal, recommendMoviesByName } from '../Store/Features/movieSlice';
-import { record_movie_history } from '../Store/Features/searchSlice';
 
 const CarouselSection = ({ title, movies }) => {
+
   const dispatch = useDispatch();
   const statusRecommendedMoviesByName = useSelector(
     (state) => state.movie.statusRecommendedMoviesByName
+    
+  );  
+  const statusRecommendedMovies = useSelector(
+    (state) => state.movie.statusRecommendedMovies
+    
+  );  
+  const statusMoviesTopRated = useSelector(
+    (state) => state.movie.statusMoviesTopRated
+    
+  );  
+  const statusCatMovies = useSelector(
+    (state) => state.movie.statusCatMovies
+    
   );  
   const statusRecord = useSelector(
     (state) => state.search.statusRecord
@@ -37,8 +50,8 @@ const CarouselSection = ({ title, movies }) => {
     ]
   };
 
-
-  const handleMovieClick = (movie) => {
+ 
+  const handleMovieClick = useCallback((movie) => {
     dispatch(openModal(movie));
     if (statusRecommendedMoviesByName === "idle"||statusRecommendedMoviesByName === "succeeded") {
       if (movie) {
@@ -49,25 +62,30 @@ const CarouselSection = ({ title, movies }) => {
         );
       }
     }
-  };
+  },[]);
 
   return (
     <div className="py-8">
-      <h2 className="text-2xl text-white mb-4">{title}</h2>
+      <h2 className="text-2xl text-white mb-4">{title}  {movies.movie_title}</h2>
+      {statusRecommendedMoviesByName === 'pending'||statusMoviesTopRated==="pending"||statusCatMovies==="pending"||statusRecommendedMovies==="pending" ? <LoadingSkeleton /> : <>
       <Slider {...settings}>
-        {Object.values(movies).map((movie, index) => (
+      {Object.values(movies).map((movie, index) => (
           <div key={index} className="px-2 cursor-pointer" onClick={() => handleMovieClick(movie)}>
             <img 
-              src={movie.poster_url ? movie.poster_url : "https://m.media-amazon.com/images/M/MV5BODM0ODg1NDI0NF5BMl5BanBnXkFtZTcwMjk0NzA0MQ@@._V1_SX300.jpg"} 
+              src={movie.poster_url ? movie.poster_url : "https://m.media-amazon.com/images/M/MV5BMjIyNjkxNzEyMl5BMl5BanBnXkFtZTYwMjc3MDE3._V1_SX300.jpg"} 
               alt={movie.title} 
               className="w-full rounded" 
             />
             <p className="mt-2 text-white">{movie.title}</p>
           </div>
         ))}
+      
       </Slider>
+      </>}
+      
+
     </div>
   );
 };
 
-export default memo(CarouselSection);
+export default CarouselSection;
