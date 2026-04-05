@@ -1,0 +1,46 @@
+# Environment files (NEVER commit)
+*.env
+*.env.local
+*.env.*.local
+.env.production
+.env.development
+
+# Secrets and credentials
+.modal.toml
+.fly.toml
+authentication.txt
+
+# Dependencies
+node_modules/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# IDE files
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build outputs
+dist/
+build/
+.next/
+
+# Logs
+*.log
+logs/
+
+# Local verification files
+test_env_loading.py
+
+# Temporary files
+*.tmp
+.cache/

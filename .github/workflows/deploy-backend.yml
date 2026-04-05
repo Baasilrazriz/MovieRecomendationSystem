@@ -1,0 +1,52 @@
+name: Deploy Backend to Fly.io
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'Backend/**'
+      - '.github/workflows/deploy-backend.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Fly.io CLI
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Authenticate with Fly.io
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          echo "Authenticating with Fly.io..."
+          mkdir -p ~/.fly
+          echo "$FLY_API_TOKEN" > ~/.fly/token
+
+      - name: Deploy to Fly.io
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          cd Backend
+          flyctl deploy \
+            --remote-only \
+            --app movie-recommendation-api
+        
+      - name: Verify Deployment
+        run: |
+          echo "🔍 Verifying deployment..."
+          sleep 10
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://movie-recommendation-api.fly.dev/health")
+          
+          if [ "$STATUS" = "200" ]; then
+            echo "✅ Deployment successful!"
+            echo "📍 API URL: https://movie-recommendation-api.fly.dev"
+          else
+            echo "⚠️  API not ready yet. Status: $STATUS"
+            echo "Check logs: flyctl logs --app movie-recommendation-api"
+          fi

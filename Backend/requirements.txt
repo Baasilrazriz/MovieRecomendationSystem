@@ -1,0 +1,10 @@
+# Lightweight requirements for Vercel deployment
+# Total size: ~8MB (vs 150MB+ with pandas + sklearn)
+
+Flask==3.0.3
+Flask-CORS==4.0.0
+python-dotenv==1.0.0
+PyJWT==2.8.0
+Werkzeug==3.0.1
+gunicorn==21.2.0
+
