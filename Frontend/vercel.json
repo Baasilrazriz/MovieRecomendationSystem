@@ -7,5 +7,11 @@
     "VITE_ENVIRONMENT": "production",
     "VITE_DEBUG": "false",
     "VITE_API_TIMEOUT": "15000"
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }
