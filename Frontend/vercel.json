@@ -3,17 +3,9 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "env": {
-    "VITE_API_URL": {
-      "required": true
-    },
-    "VITE_ENVIRONMENT": {
-      "required": false
-    },
-    "VITE_DEBUG": {
-      "required": false
-    },
-    "VITE_API_TIMEOUT": {
-      "required": false
-    }
+    "VITE_API_URL": "https://baasilrazriz--movie-rec-server-flask-asgi.modal.run",
+    "VITE_ENVIRONMENT": "production",
+    "VITE_DEBUG": "false",
+    "VITE_API_TIMEOUT": "15000"
   }
 }
