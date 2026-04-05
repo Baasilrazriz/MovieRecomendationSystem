@@ -1,18 +1,28 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import { authAPI } from "../../services/apiService";
 
 export const loginUser = createAsyncThunk(
   "login/loginUser",
   async ({ username, password = null }, { rejectWithValue }) => {
     try {
-      const response = await axios.post("http://127.0.0.1:5000/login", {
-        username,
-        password,
-      });
-      return username;
+      const response = await authAPI.login(username, password);
+      
+      // Store JWT token and username
+      if (response.data.token) {
+        localStorage.setItem('auth_token', response.data.token);
+        localStorage.setItem('username', username);
+      }
+      
+      return {
+        username: response.data.username,
+        token: response.data.token,
+      };
     } catch (error) {
-      console.log(rejectWithValue(error.response.data));
-      return rejectWithValue(error.response.data);
+      console.error('Login error:', error.response?.data || error.message);
+      return rejectWithValue({
+        message: error.response?.data?.error || 'Login failed',
+        status: error.response?.status,
+      });
     }
   }
 );

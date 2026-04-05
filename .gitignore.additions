@@ -1,0 +1,42 @@
+# Add these to your .gitignore to protect sensitive data
+
+# Fly.io deployment files
+.fly-deployment.env
+fly.toml.local
+
+# Backend sensitive files
+Backend/.env
+Backend/.env.local
+Backend/authentication.txt
+Backend/__pycache__/
+Backend/*.pyc
+Backend/.DS_Store
+
+# Frontend env files
+Frontend/.env.local
+Frontend/.env.*.local
+Frontend/dist/
+
+# IDE files
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Dependencies
+node_modules/
+venv/
+__pycache__/
+*.egg-info/
+
+# Logs
+*.log
+logs/
+
+# Build outputs
+dist/
+build/

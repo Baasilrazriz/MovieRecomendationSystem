@@ -1,0 +1,44 @@
+{
+  "version": 2,
+  "buildCommand": "pip install -r requirements.txt",
+  "functions": {
+    "api/login.py": {
+      "memory": 512,
+      "maxDuration": 10
+    },
+    "api/recommend.py": {
+      "memory": 1024,
+      "maxDuration": 10
+    },
+    "api/top_rated.py": {
+      "memory": 512,
+      "maxDuration": 10
+    },
+    "api/categories.py": {
+      "memory": 512,
+      "maxDuration": 10
+    },
+    "api/filter.py": {
+      "memory": 512,
+      "maxDuration": 10
+    },
+    "api/search.py": {
+      "memory": 512,
+      "maxDuration": 10
+    }
+  },
+  "env": {
+    "SECRET_KEY": "@SECRET_KEY_CHANGE_ME",
+    "DEBUG": "False"
+  },
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/$1.py"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/api/__init__.py"
+    }
+  ]
+}

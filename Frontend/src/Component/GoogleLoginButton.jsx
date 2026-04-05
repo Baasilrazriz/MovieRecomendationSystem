@@ -41,7 +41,7 @@ const GoogleLoginButton = () => {
     };
 
     return (
-        <GoogleOAuthProvider clientId="331398497699-i77hu31ro8qm6sspdmmn56ije1lj0q0v.apps.googleusercontent.com">
+        <GoogleOAuthProvider clientId="158509634434-i77i71728i6rcj4ccbsk07bo5ua87s5v.apps.googleusercontent.com">
             <GoogleLogin
                 onSuccess={handleLoginSuccess}
                 onFailure={handleLoginFailure}

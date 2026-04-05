@@ -7,7 +7,7 @@ CORS(app)
 
 system = MovieRecommendationSystem("movie_dataset.csv", "User_history.csv", "User_searches.csv")
 
-api_key = os.getenv('OMDB_API_KEY', 'ad45e532')
+api_key = os.getenv('OMDB_API_KEY', '')
 @app.route('/')
 def welcome():
     return jsonify({"logged_in_user": system.logged_in_user})

@@ -1,0 +1,19 @@
+# Backend gitignore
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.env
+.env.local
+.env.*.local
+*.egg-info/
+dist/
+build/
+.DS_Store
+.vscode/
+.idea/
+*.log
+node_modules/
+.vercel/
+venv/
+env/

@@ -1,0 +1,11 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "env": [
+    "VITE_API_URL",
+    "VITE_ENVIRONMENT",
+    "VITE_DEBUG",
+    "VITE_API_TIMEOUT"
+  ]
+}
